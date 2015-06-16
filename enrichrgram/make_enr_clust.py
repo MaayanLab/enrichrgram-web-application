@@ -1,5 +1,7 @@
 def main( gmt_colors, inst_genes, num_terms, dist_type):
 
+	import time
+
 	print('in main function of make_enr_clust')
   
 	# get list of gmts
@@ -15,6 +17,9 @@ def main( gmt_colors, inst_genes, num_terms, dist_type):
 
 	# initialize enr
 	enr = []
+
+	# wait for user list to be input 
+	time.sleep(0.05)
 
 	# loop through gmts 
 	for inst_gmt in gmt_colors:
@@ -79,7 +84,7 @@ def enrichr_post_request( input_genes, meta=''):
 	userListId = str(inst_dict['userListId'])
 
 	# wait for response 
-	print(userListId)
+	print( '\n\nuserListId\t' + str(userListId) + '\n\n' )
 
 	# return the userListId that is needed to reference the list later 
 	return userListId
@@ -99,11 +104,32 @@ def enrichr_get_request( gmt, num_terms, userListId, inst_color ):
 	# get parameters 
 	params = {'backgroundType':gmt,'userListId':userListId}
 
-	# make the get request to get the enrichr results 
-	get_response = requests.get( get_url, params=params )
+	# try get request until status code is 200 
+	inst_status_code = 400
+
+	# wait until okay status code is returned 
+	while inst_status_code == 400:
+		try:
+			# make the get request to get the enrichr results 
+			get_response = requests.get( get_url, params=params )
+
+			# get status_code
+			inst_status_code = get_response.status_code
+
+			print('checking status code: '+str(inst_status_code))
+
+		except:
+			pass
 
 	# check that the response is 200 (Okay)
+	print('\ncheck get request code')
 	print(get_response)
+	print(get_response.status_code)
+	print(type(get_response))
+	print('\n')
+
+	if get_response.status_code == 200:
+		print('Response code of 200')
 
 	# load as dictionary 
 	resp_json = json.loads( get_response.text )
