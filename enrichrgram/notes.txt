@@ -146,8 +146,8 @@ Enrichrgram To Do
 	Enrichr returns pval, z-score, and combined score. I'm not sure if the combined score is calculated with the regular or adjusted pval. It also seems that inputting the exaple list from Enrichr results in an error. 
 
 	Avi wants me to add 
-		0. fix status of request bug 
-		1. add multiple gmt files in the same clustergram 
+		-. fix status of request bug - it seems to be a bug on enrichr's end 
+		-. add multiple gmt files in the same clustergram 
 		1.1 allow website to be linkable 
 		2. Add a counter for the number of lists that have been processed
 			need to set up mongodb database
@@ -196,6 +196,24 @@ Enrichrgram To Do
 				KEA and Biocarta
 			that say I have a negative rect width. I'm also getting blue tiles, which shouldn't be happening. I think that this is probably happrning because the code is expecting 30 enriched terms - the error only happens when the number of enriched terms is less than 30. 
 
+6-11-2015
+	Avi suggestions 
+		1. need icon in corner
+		2. add other scoring methods
+		3. not clear how the squares are color-coded - explain
+		4. zooming in and out does not work well - disable zoom out and panning when zooming out
+		5. Example should have  aquantitative option 
+		6. not good use of space available on the screen - selected MMDB metabolites, PRAM, TF PPI. Why are there so few genes and so few terms?
+		7. It is confusing when you want to have multiple libraries. If the person clicks on one it should be added not overridden what is already selected 
+		8. Should add a feature where when you click on something the text becomes bigger
+		9. Increasing the text size can be useful for mouse-overs if you know the text is very small, very mouse over or click should make the text bigger.
+		10. You should be able to cluster the rows (separately)
+		11. It seems that the clustering needs to adjust to the fact that the some GMT files give low p-calues and some high, there is no mixing in that case. 
+		12. add list counter 
 
 
+	I need to add some icon, because currently the linux penguin is showing. 
 
+	I think I will switch to vertical zooming only. I can restrict the number of enriched terms per gmt so that there are no more than ~50-90 - or I can add a zoom in upon mouse over to make it easier to read the columns. I could impement a two part zoom. Zooming would start vertically - the height of the rects would be less than thir width and the visualization will take up the entire  viewing area; once you zoom in enough to make the rects squares then horizontal zooming will start. This will allow users to zoom into the columns if they are unable to read it. 
+
+	I also need to have the website adjust the size of the visualization to the size of the browser window. 
