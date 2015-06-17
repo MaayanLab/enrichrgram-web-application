@@ -27,12 +27,10 @@ $( "#searchForm" ).submit( function( event ) {
     // number of enriched terms 
     num_terms = 20; 
 
-    // docker_vs_local
+    // docker and local
     /////////////////////////////////
     // manually set url (local - works for local and docker)
     url = '/enrichrgram/'
-    // // !!! (docker - does not work)
-    // url = '/'
 
     // set up variable for the post request with gene list: inst_genes
     var posting = $.post( url, { genes: inst_genes, num_terms: num_terms, gmt_colors:JSON.stringify(gmt_colors) } );
