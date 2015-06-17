@@ -253,6 +253,14 @@ function zoomed() {
   // reset font size 
   d3.selectAll('.col_label_text').select('text').style('font-size', default_fs_col+'px');
 
+  // reset bar heights 
+  ////////////////
+  // reduce the height of the enrichment bars based on the zoom applied 
+  // recalculate the height and divide by the zooming scale 
+  col_label_obj.select('rect')
+    // column is rotated - effectively width and height are switched
+    .attr('width', function(d,i) { return bar_scale_col( d.nl_pval )  ; });
+
   // zoom into clustergram 
   //////////////////////////////
   // if height is less than width, zoom vertically only 
@@ -274,6 +282,7 @@ function zoomed() {
 
     }
     else{
+
 
       // do not translate 
       // reset translate vector 
@@ -319,6 +328,12 @@ function zoomed() {
       // change the font size of the labels 
       d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
 
+      // reduce the height of the enrichment bars based on the zoom applied 
+      // recalculate the height and divide by the zooming scale 
+      col_label_obj.select('rect')
+        // column is rotated - effectively width and height are switched
+        .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / (d3.event.scale/zoom_switch) ; });
+
     }
     // allow panning in the negative direction 
     else if (d3.event.translate[0] - margin.left <= -pan_room){
@@ -343,6 +358,11 @@ function zoomed() {
       // change the font size of the labels 
       d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
 
+      // reduce the height of the enrichment bars based on the zoom applied 
+      // recalculate the height and divide by the zooming scale 
+      col_label_obj.select('rect')
+        // column is rotated - effectively width and height are switched
+        .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / (d3.event.scale/zoom_switch) ; });
 
     }
     // allow two dimensional panning 
@@ -366,23 +386,16 @@ function zoomed() {
       // change the font size of the labels 
       d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
 
+      // reduce the height of the enrichment bars based on the zoom applied 
+      // recalculate the height and divide by the zooming scale 
+      col_label_obj.select('rect')
+        // column is rotated - effectively width and height are switched
+        .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / (d3.event.scale/zoom_switch) ; });
 
     }
 
   }
 
-
-
-  // // matrix
-  // svg_obj.attr("transform", "translate(" + [ trans_x + margin.left, trans_y + margin.top ] + ") scale(" + d3.event.scale + ")");
-
-  // // column labels - only translate in one dimension, also zoom  
-  // d3.select('#col_labels')
-  // .attr("transform", "translate(" + [col_margin.left + trans_x, col_margin.top ] + ") scale(" + d3.event.scale + ")");
-  
-  // // row labels - only translate in one dimension, also zoom 
-  // d3.select('#row_labels')
-  // .attr("transform", "translate(" + [row_margin.left  , row_margin.top+ trans_y ] + ") scale(" + d3.event.scale + ")");
 
   // reduce font-size to compensate for zoom 
   // calculate the recuction of the font size 
@@ -394,12 +407,6 @@ function zoomed() {
   // change the font size of the labels 
   d3.selectAll('.row_label_text').select('text').style('font-size', fin_font);
 
-  
-  // reduce the height of the enrichment bars based on the zoom applied 
-  // recalculate the height and divide by the zooming scale 
-  col_label_obj.select('rect')
-    // column is rotated - effectively width and height are switched
-    .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / d3.event.scale ; });
 
 
 

@@ -158,18 +158,14 @@ d3.json('/enrichrgram/static/enrichr_gmt_data/enrichr_gmts.json', function(data)
 // initialize clustergram: size, scales, etc. 
 function initialize_clustergram(network_data){
   
-  // initialize visualization size
-  set_visualization_size();
-  
   // move network_data information into global variables 
   col_nodes  = network_data.col_nodes ;
   row_nodes  = network_data.row_nodes ;
   inst_links = network_data.links; 
 
-  // define the zoom switch value
-  // switch from 1 to 2d zoom 
-  zoom_switch = (svg_width/col_nodes.length)/(svg_height/row_nodes.length);
-
+  // initialize visualization size
+  set_visualization_size();
+  
   // scaling functions 
   // scale used to size rects 
   x_scale = d3.scale.ordinal().rangeBands([0, svg_width]) ;
@@ -198,14 +194,14 @@ function initialize_clustergram(network_data){
   // scale default font size: input domain is the number of nodes
   min_node_num = 5;
   max_node_num = 100;
-  max_fs = 22;
   min_fs = 5;
+  max_fs = 20;
 
   // controls how much the font size is increased by zooming when the number of nodes is at its max
   // and they need to be zoomed into
   // 1: do not increase font size while zooming
   // 0: increase font size while zooming
-  max_fs_zoom = 0.35; 
+  max_fs_zoom = 0.0; 
   // output range is the font size 
   scale_font_size = d3.scale.log().domain([min_node_num,max_node_num]).range([max_fs,min_fs]).clamp('true');
   // define the scaling for the reduce font size factor 
@@ -319,6 +315,8 @@ function set_visualization_size(){
   console.log(screen_width)
   console.log(screen_height)
 
+  // do not allow width to be less than height 
+
   // adjust screen width for left margin 
   screen_width_adj = screen_width -300;
 
@@ -329,6 +327,17 @@ function set_visualization_size(){
   // define width and height of clustergram container 
   width_clust_container = screen_width - 300;
   height_clust_container = screen_height - 150;
+
+  // set zoom factor 
+  zoom_factor = (width_clust_container/col_nodes.length)/(height_clust_container/row_nodes.length)
+
+  // ensure that width of rects is not less than height 
+  if (zoom_factor < 1){
+    // scale the height 
+    height_clust_container = width_clust_container*(row_nodes.length/col_nodes.length);
+  };
+
+
   // set clustergram_container
   d3.select('#clustergram_container').style('width', width_clust_container+'px')
   d3.select('#clustergram_container').style('height', height_clust_container+'px')
@@ -341,6 +350,14 @@ function set_visualization_size(){
   // !! this can be improved 
   svg_width = screen_width_adj - 250 ;
   svg_height = height_clust_container - 250;
+
+
+  // define the zoom switch value
+  // switch from 1 to 2d zoom 
+  zoom_switch = (svg_width/col_nodes.length)/(svg_height/row_nodes.length);
+
+
+
 };
 
 // recalculate the size of the visualization

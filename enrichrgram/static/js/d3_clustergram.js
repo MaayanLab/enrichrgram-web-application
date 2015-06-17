@@ -37,7 +37,7 @@ function make_d3_clustergram(network_data) {
   // define the variable zoom, a d3 method 
   max_zoom_out = 0.1
   max_zoom_in = 10
-  zoom = d3.behavior.zoom().scaleExtent([1,3*zoom_switch]).on('zoom',zoomed);
+  zoom = d3.behavior.zoom().scaleExtent([1,1.5*zoom_switch]).on('zoom',zoomed);
 
   // initialize variables 
   matrix = [] ;
@@ -253,9 +253,9 @@ function make_d3_clustergram(network_data) {
   // append row label text 
   row_label_obj.append('text')
     // !! this will be fixed once I have separate x and y scales 
-    .attr('y', x_scale.rangeBand() / 4)
     // !! can be improved 
-    // .attr('dy', x_scale.rangeBand()/16)
+    .attr('y', y_scale.rangeBand()/2 )
+    .attr('dy', y_scale.rangeBand()/4)
     .attr('text-anchor','end')
     .style('font-size',default_fs_row+'px')
     .text(function(d, i) { return d.name; } )
@@ -370,12 +370,12 @@ function make_d3_clustergram(network_data) {
   // hide spillover from slanted column labels
   d3.select('#main_svg')
     .append('rect')
-    .attr('fill','white')
+    .attr('fill','red')
     .attr('width','150px')
     .attr('height','200px')
     .attr('transform', function(){
       tmp_left = margin.left + svg_width + 141;
-      tmp_top = -80;
+      tmp_top = -margin.top;
       return 'translate('+tmp_left+','+tmp_top+') rotate(45)' 
     })
     .attr('class','white_bars')
