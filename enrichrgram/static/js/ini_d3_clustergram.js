@@ -193,8 +193,8 @@ function initialize_clustergram(network_data){
   // font size controls 
   // scale default font size: input domain is the number of nodes
   min_node_num = 5;
-  max_node_num = 100;
-  min_fs = 5;
+  max_node_num = 800;
+  min_fs = 0.5;
   max_fs = 20;
 
   // controls how much the font size is increased by zooming when the number of nodes is at its max
@@ -217,6 +217,12 @@ function initialize_clustergram(network_data){
   // calculate the reduce font-size factor: 0 for no reduction in font size and 1 for full reduction of font size
   reduce_font_size_factor_row = scale_reduce_font_size_factor(row_nodes.length);
   reduce_font_size_factor_col = scale_reduce_font_size_factor(col_nodes.length);
+
+  // set up the real zoom (2d zoom) as a function of the number of col_nodes
+  // since these are the nodes that are zoomed into in 2d zooming 
+  real_zoom_scale = d3.scale.linear().domain([min_node_num,max_node_num]).range([1.2,5]).clamp('true');
+  // calculate the zoom factor - the more nodes the more zooming allowed
+  real_zoom = real_zoom_scale(col_nodes.length);
 
   // label width
   label_width = 100;
