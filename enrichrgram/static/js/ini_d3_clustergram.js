@@ -158,22 +158,22 @@ d3.json('/enrichrgram/static/enrichr_gmt_data/enrichr_gmts.json', function(data)
 // initialize clustergram: size, scales, etc. 
 function initialize_clustergram(network_data){
   
+  // initialize visualization size
+  set_visualization_size();
+  
   // move network_data information into global variables 
   col_nodes  = network_data.col_nodes ;
   row_nodes  = network_data.row_nodes ;
   inst_links = network_data.links; 
 
-  // clustergram size 
-  overall_size = 300 ;
-  clustergram_width  = overall_size;
-  clustergram_height = overall_size*(row_nodes.length/col_nodes.length);
-  svg_width = 600;
-  svg_height = 700;
-  
+  // define the zoom switch value
+  // switch from 1 to 2d zoom 
+  zoom_switch = (svg_width/col_nodes.length)/(svg_height/row_nodes.length);
+
   // scaling functions 
   // scale used to size rects 
-  x_scale = d3.scale.ordinal().rangeBands([0, clustergram_width]) ;
-  y_scale = d3.scale.ordinal().rangeBands([0, clustergram_height]); 
+  x_scale = d3.scale.ordinal().rangeBands([0, svg_width]) ;
+  y_scale = d3.scale.ordinal().rangeBands([0, svg_height]); 
 
   // Sort rows and columns 
   orders = {
@@ -198,14 +198,14 @@ function initialize_clustergram(network_data){
   // scale default font size: input domain is the number of nodes
   min_node_num = 5;
   max_node_num = 100;
-  max_fs = 18;
-  min_fs = 4;
+  max_fs = 22;
+  min_fs = 5;
 
   // controls how much the font size is increased by zooming when the number of nodes is at its max
   // and they need to be zoomed into
   // 1: do not increase font size while zooming
   // 0: increase font size while zooming
-  max_fs_zoom = 0.7; 
+  max_fs_zoom = 0.35; 
   // output range is the font size 
   scale_font_size = d3.scale.log().domain([min_node_num,max_node_num]).range([max_fs,min_fs]).clamp('true');
   // define the scaling for the reduce font size factor 
@@ -216,9 +216,11 @@ function initialize_clustergram(network_data){
   scale_rects = d3.scale.log().domain([min_node_num,max_node_num]).range([50,6]).clamp('true');
 
   // font size is a variable since it gets scaled down with zooming  
-  default_fs = scale_font_size(col_nodes.length); 
+  default_fs_row = scale_font_size(row_nodes.length); 
+  default_fs_col = scale_font_size(col_nodes.length); 
   // calculate the reduce font-size factor: 0 for no reduction in font size and 1 for full reduction of font size
-  reduce_font_size_factor = scale_reduce_font_size_factor(row_nodes.length);
+  reduce_font_size_factor_row = scale_reduce_font_size_factor(row_nodes.length);
+  reduce_font_size_factor_col = scale_reduce_font_size_factor(col_nodes.length);
 
   // label width
   label_width = 100;
@@ -295,3 +297,80 @@ function initialize_clustergram(network_data){
 
   };
 };
+
+function set_visualization_size(){
+  console.log('resizing')
+
+  // from http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
+  x_window = window.innerWidth ;
+  y_window = window.innerHeight ;
+
+  // set wrapper width and height
+  d3.select('#wrapper').style('width', x_window);
+  d3.select('#wrapper').style('height',y_window);
+
+  // initalize clutergram container 
+  // 
+  // get screen width 
+  screen_width  = Number(d3.select('#wrapper').style('width').replace('px',''));
+  // get screen height
+  screen_height = Number(d3.select('#wrapper').style('height').replace('px',''));
+
+  console.log(screen_width)
+  console.log(screen_height)
+
+  // adjust screen width for left margin 
+  screen_width_adj = screen_width -300;
+
+  // adjust the width of the main container
+  d3.select('#main_container').style('width',screen_width_adj+'px')
+
+  // adjust container with border
+  // define width and height of clustergram container 
+  width_clust_container = screen_width - 300;
+  height_clust_container = screen_height - 50;
+  // set clustergram_container
+  d3.select('#clustergram_container').style('width', width_clust_container+'px')
+  d3.select('#clustergram_container').style('height', height_clust_container+'px')
+
+  // set height of clust_and_row_container
+  d3.select('#clust_and_row_container').style('width',width_clust_container+'px')
+  d3.select('#clust_and_row_container').style('height',height_clust_container+'px')
+
+  // clustergram size 
+  // !! this can be improved 
+  svg_width = screen_width_adj - 250 ;
+  svg_height = height_clust_container - 150;
+};
+
+// recalculate the size of the visualization
+// and remake the clustergram 
+function reset_visualization_size(){
+
+  // recalculate the size 
+  set_visualization_size();
+
+
+
+  // pass the network data to d3_clustergram 
+  make_d3_clustergram(global_network_data)
+
+}
+
+// set var doit 
+var doit;
+
+
+// function with timeout
+function timeout_resize(){
+
+  // clear timeout
+  clearTimeout(doit);
+
+  doit = setTimeout( reset_visualization_size, 500)  ;
+
+
+};
+
+// resize window 
+d3.select(window).on('resize', timeout_resize); 

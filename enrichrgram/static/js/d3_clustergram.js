@@ -35,7 +35,9 @@ function make_d3_clustergram(network_data) {
   d3.select('#container_gmt_labels').style('display','none');
 
   // define the variable zoom, a d3 method 
-  zoom = d3.behavior.zoom().scaleExtent([0.5,10]).on('zoom',zoomed);
+  max_zoom_out = 0.1
+  max_zoom_in = 10
+  zoom = d3.behavior.zoom().scaleExtent([1,3*zoom_switch]).on('zoom',zoomed);
 
   // initialize variables 
   matrix = [] ;
@@ -65,7 +67,7 @@ function make_d3_clustergram(network_data) {
   svg_obj = d3.select("#svg_div")
       .append("svg")
       .attr('id', 'main_svg')
-      .attr("width",  svg_width  + margin.left + margin.right)
+      .attr("width",  svg_width  + margin.left + margin.right + 100)
       .attr("height", svg_height + margin.top  + margin.bottom)
       .attr('border',1)
       .call( zoom ) 
@@ -117,8 +119,9 @@ function make_d3_clustergram(network_data) {
   d3.select('#clust_group')
     .append("rect")
     .attr("class", "background")
-    .attr("width", clustergram_width)
-    .attr("height", clustergram_height);
+    .attr('id','grey_background')
+    .attr("width", svg_width)
+    .attr("height", svg_height);
 
   // Make Expression Rows   
   // use matrix for the data join, which contains a two dimensional 
@@ -140,7 +143,23 @@ function make_d3_clustergram(network_data) {
 
   // horizontal line
   row_obj.append('line')
-    .attr('x2', 20*clustergram_width)
+    .attr('x2', 20*svg_width)
+    .style('stroke-width', border_width/zoom_switch+'px')
+
+  // try to add vertical lines
+  vert_lines = svg_obj
+    .selectAll('.vert_lines')
+    .data(col_nodes)
+    .enter()
+    .append('g')
+    .attr('class','vert_lines')
+    .attr('transform', function(d,i){ return 'translate(' + x_scale(i) + ') rotate(-90)'; })
+
+  // add separating vertical lines
+  vert_lines
+    .append('line')
+    .attr('x1',0)
+    .attr('x2',-20*svg_height)
     .style('stroke-width', border_width+'px')
 
   // select all columns 
@@ -160,14 +179,7 @@ function make_d3_clustergram(network_data) {
     .attr('transform', 'translate('+x_scale.rangeBand()/2+','+ x_offset_click +') rotate(45)')
     .on('click', reorder_click_col );
 
-  // add separating vertical line, below the labels 
-  // col_label_obj
-  d3.select('#col_labels')
-    .selectAll('.col_label_text')
-    .append('line')
-    .attr('x1', 0)
-    .attr('x2', -20*clustergram_height)
-    .style('stroke-width', border_width+'px')
+
 
 
   // get the max abs nl_pval (find obj and get nl_pval)
@@ -208,7 +220,7 @@ function make_d3_clustergram(network_data) {
     // .attr("dy", ".32em")
     .attr("text-anchor", "start")
     .attr('full_name',function(d) { return d.name } )
-    .style('font-size',default_fs+'px')
+    .style('font-size',default_fs_col+'px')
     .text(function(d, i) { return d.name; });
 
 
@@ -240,10 +252,12 @@ function make_d3_clustergram(network_data) {
 
   // append row label text 
   row_label_obj.append('text')
-    .attr('y', x_scale.rangeBand() / 2)
-    .attr('dy', '.32em')
+    // !! this will be fixed once I have separate x and y scales 
+    .attr('y', x_scale.rangeBand() / 4)
+    // !! can be improved 
+    // .attr('dy', x_scale.rangeBand()/16)
     .attr('text-anchor','end')
-    .style('font-size',default_fs+'px')
+    .style('font-size',default_fs_row+'px')
     .text(function(d, i) { return d.name; } )
 
   // run add double click zoom function 
@@ -338,6 +352,43 @@ function make_d3_clustergram(network_data) {
       .style('clear','both');
 
   };
+
+
+  // hide spillover from right
+  // !! needs to be improved  
+  d3.select('#main_svg')
+    .append('rect')
+    .attr('fill', 'white')
+    .attr('width', '200px')
+    .attr('height', '3000px')
+    .attr('transform', function() { 
+      tmp_left = margin.left + svg_width;
+      return 'translate('+tmp_left+','+margin.top+')'
+    })
+    .attr('class','white_bars');
+
+  // hide spillover from slanted column labels
+  d3.select('#main_svg')
+    .append('rect')
+    .attr('fill','white')
+    .attr('width','150px')
+    .attr('height','200px')
+    .attr('transform', function(){
+      tmp_left = margin.left + svg_width + 141;
+      tmp_top = -80;
+      return 'translate('+tmp_left+','+tmp_top+') rotate(45)' 
+    })
+    .attr('class','white_bars')
+
+  // run add double click zoom function 
+  add_double_click(); 
+
+  // initialize translate vector to compensate for label margins 
+  zoom.translate([ margin.left, margin.top]);
+
+
+
+
 
 };
 
