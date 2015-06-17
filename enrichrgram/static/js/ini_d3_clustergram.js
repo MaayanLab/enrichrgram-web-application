@@ -220,7 +220,7 @@ function initialize_clustergram(network_data){
 
   // set up the real zoom (2d zoom) as a function of the number of col_nodes
   // since these are the nodes that are zoomed into in 2d zooming 
-  real_zoom_scale = d3.scale.linear().domain([min_node_num,max_node_num]).range([1.2,5]).clamp('true');
+  real_zoom_scale = d3.scale.linear().domain([min_node_num,max_node_num]).range([2,7]).clamp('true');
   // calculate the zoom factor - the more nodes the more zooming allowed
   real_zoom = real_zoom_scale(col_nodes.length);
 
@@ -245,7 +245,7 @@ function initialize_clustergram(network_data){
 
   // set col_label_width and row_label_width
   row_label_width = label_scale(row_max_char) ;
-  col_label_width = label_scale(col_max_char) ;
+  col_label_width = 1.25*label_scale(col_max_char) ;
 
   // Margins 
   col_margin = { top:col_label_width - label_margin, right:0, bottom:0, left:row_label_width };
@@ -355,7 +355,7 @@ function set_visualization_size(){
   // clustergram size 
   // !! this can be improved 
   svg_width = screen_width_adj - 250 ;
-  svg_height = height_clust_container - 250;
+  svg_height = height_clust_container - 300;
 
 
   // define the zoom switch value
