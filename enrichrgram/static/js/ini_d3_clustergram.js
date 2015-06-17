@@ -328,7 +328,7 @@ function set_visualization_size(){
   // adjust container with border
   // define width and height of clustergram container 
   width_clust_container = screen_width - 300;
-  height_clust_container = screen_height - 50;
+  height_clust_container = screen_height - 150;
   // set clustergram_container
   d3.select('#clustergram_container').style('width', width_clust_container+'px')
   d3.select('#clustergram_container').style('height', height_clust_container+'px')
@@ -340,7 +340,7 @@ function set_visualization_size(){
   // clustergram size 
   // !! this can be improved 
   svg_width = screen_width_adj - 250 ;
-  svg_height = height_clust_container - 150;
+  svg_height = height_clust_container - 250;
 };
 
 // recalculate the size of the visualization
