@@ -50,10 +50,8 @@ function make_d3_clustergram(network_data) {
   // Add information to the matrix
   network_data.links.forEach( function(link) {
 
-    // console.log(link.color)
-
     // transfer link information to the new adj matrix
-    matrix[link.source][link.target].value += link.value;
+    matrix[link.source][link.target].value = link.value;
     // transfer group information to the adj matrix 
     matrix[link.source][link.target].group = 1;
     // transfer color 
@@ -203,7 +201,7 @@ function make_d3_clustergram(network_data) {
     .attr('fill', function(d){
       return d.color;
     })
-    .attr('opacity', 0.5)
+    .attr('opacity', 0.4)
     .attr('transform', function(d, i) { return "translate(0,0)"; });
 
   // for hover effect 
@@ -363,9 +361,7 @@ function make_d3_clustergram(network_data) {
     .attr('height', '3000px')
     .attr('transform', function() { 
       tmp_left = margin.left + svg_width;
-      // taking into consideration label margin
-      tmp_top = margin.top - 5;
-      return 'translate('+tmp_left+','+tmp_top+')'
+      return 'translate('+tmp_left+','+margin.top+')'
     })
     .attr('class','white_bars');
 

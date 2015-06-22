@@ -340,10 +340,15 @@ function zoomed() {
   // reset translate vector - add back margins to trans_x and trans_y  
   zoom.translate([ trans_x +  margin.left, trans_y + margin.top]);
 
+  // Font Sizes 
+  //////////////////
+  // reduce the font size by dividing by some part of the zoom 
+  // if reduce_font_size_factor_ is 1, then the font will be divided by the whole zoom - and the labels will not increase in size 
+  // if reduce_font_size_factor_ is 0, then the font will be divided 1 - and the labels will increase in size 
 
   // reduce font-size to compensate for zoom 
   // calculate the recuction of the font size 
-  reduce_font_size = d3.scale.linear().domain([0,1]).range([1,d3.event.scale]).clamp('true');
+  reduce_font_size = d3.scale.linear().domain([0,1]).range([1,zoom_y]).clamp('true');
   // scale down the font to compensate for zooming 
   fin_font = default_fs_row/(reduce_font_size(reduce_font_size_factor_row)); 
   // add back the 'px' to the font size 

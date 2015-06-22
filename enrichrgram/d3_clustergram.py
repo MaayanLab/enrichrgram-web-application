@@ -57,17 +57,19 @@ def d3_clust_single_value(nodes, clust_order, mat, terms_colors):
 			# take the mean of the two values times the binary mat[i,j]
 			inst_value = ( row_value + col_value )/ 2 * mat[i,j] 
 
-			# save the inst_dict['value']
-			inst_dict['value'] = inst_value 
-
-			# # need to look up the color
-			# print(nodes['col'][j])
+			# make minimum inst_value 0.1 
+			if inst_value > 0:
+				# save the inst_dict['value']
+				inst_dict['value'] = inst_value + 0.1 
 
 			# add the color 
 			inst_dict['color'] = terms_colors[nodes['col'][j]]
 
-			# append to links 
-			d3_json['links'].append( inst_dict )
+			# only keep non-zero value links 
+			if inst_value > 0: 
+
+				# append to links 
+				d3_json['links'].append( inst_dict )
 
 	return d3_json
 
