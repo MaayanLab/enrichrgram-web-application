@@ -65,7 +65,7 @@ function make_d3_clustergram(network_data) {
   svg_obj = d3.select("#svg_div")
       .append("svg")
       .attr('id', 'main_svg')
-      .attr("width",  svg_width  + margin.left + margin.right + 100)
+      .attr("width",  svg_width  + margin.left + margin.right + spillover_x_offset)
       .attr("height", svg_height + margin.top  + margin.bottom)
       .attr('border',1)
       .call( zoom ) 
@@ -361,22 +361,11 @@ function make_d3_clustergram(network_data) {
     .attr('height', '3000px')
     .attr('transform', function() { 
       tmp_left = margin.left + svg_width;
-      return 'translate('+tmp_left+','+margin.top+')'
+      // compensate for margin
+      tmp_top = margin.top - 5;
+      return 'translate('+tmp_left+','+tmp_top+')'
     })
     .attr('class','white_bars');
-
-  // // hide spillover from slanted column labels
-  // d3.select('#main_svg')
-  //   .append('rect')
-  //   .attr('fill','red')
-  //   .attr('width','150px')
-  //   .attr('height','200px')
-  //   .attr('transform', function(){
-  //     tmp_left = margin.left + svg_width ;
-  //     tmp_top = col_label_width ; //-margin.top;
-  //     return 'translate('+tmp_left+','+tmp_top+')' 
-  //   })
-  //   .attr('class','white_bars')
 
   // hide spillover from slanged column labels
   d3.select('#main_svg')

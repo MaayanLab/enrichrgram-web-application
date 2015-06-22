@@ -256,16 +256,12 @@ function set_visualization_size(){
   console.log('resizing')
 
   // define offsets for permanent row and col margins 
-  row_offset = 230;
+  row_offset = 280;
   col_offset = 50;
 
   // // define margins for genes and resources labels
   // genes_label_margin = 50;
   // resources_label_margin = 50;
-
-  // define offset for svg
-  svg_x_offset = 150; //  190;
-  svg_y_offset = 50;
 
   // find the label with the most characters and use it to adjust the row and col margins 
   row_max_char = _.max(row_nodes, function(inst) {return inst.name.length;}).name.length;
@@ -281,7 +277,14 @@ function set_visualization_size(){
   // set col_label_width and row_label_width
   row_label_width = label_scale(row_max_char) ;
   // !! add a little more space to compensate for triangles 
-  col_label_width = label_scale(col_max_char) + 30 ;
+  triangle_space = 30;
+  col_label_width = label_scale(col_max_char) + triangle_space ;
+
+  // define offset for svg
+  // add x and y offsets and x spillover offset 
+  spillover_x_offset = label_scale(col_max_char)* 0.8 ;
+  svg_x_offset = 50 + spillover_x_offset; //  190;
+  svg_y_offset = 50;
 
   // distance between labels and clustergram
   // label_margin = 2*border_width;
@@ -291,7 +294,7 @@ function set_visualization_size(){
   col_margin = { top:col_label_width - label_margin, right:0, bottom:0, left:row_label_width              };//!!
   row_margin = { top:col_label_width,                right:0, bottom:0, left:row_label_width-label_margin };//!!
   margin     = { top:col_label_width,                right:0, bottom:0, left:row_label_width              };
-  offset     = { top:col_offset,     right:0, bottom:0, left:row_label_width+row_offset   };
+  offset     = { top:col_offset,     right:0, bottom:0, left:row_offset };
 
   // from http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
   x_window = window.innerWidth ;
