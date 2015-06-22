@@ -367,6 +367,13 @@ function zoomed() {
   // change the font size of the labels 
   d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
 
+  // enrichment bars 
+  ///////////////////////
+  // reduce the height of the enrichment bars based on the zoom applied 
+  // recalculate the height and divide by the zooming scale 
+  col_label_obj.select('rect')
+    // column is rotated - effectively width and height are switched
+    .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / (zoom_x) ; });
 
 };
 
