@@ -165,23 +165,25 @@ function initialize_clustergram(network_data){
 
   // initialize visualization size
   set_visualization_size();
-  
-  
+
+  // define screen width font size scale 
+  scale_fs_screen = d3.scale.linear().domain([800,2000]).range([0.5,1.0]).clamp('true');
 
   // font size controls 
   // scale default font size: input domain is the number of nodes
   min_node_num = 30;
   max_node_num = 800;
   min_fs = 0.5;
-  max_fs = 15;
+  // reduce or increase the font size based on the total screen width 
+  max_fs = 15 * scale_fs_screen(screen_width);
+  // output range is the font size 
+  scale_font_size = d3.scale.log().domain([min_node_num,max_node_num]).range([max_fs,min_fs]).clamp('true');
 
   // controls how much the font size is increased by zooming when the number of nodes is at its max
   // and zooming is required 
   // 1: do not increase font size while zooming
   // 0: increase font size while zooming
   max_fs_zoom = 0.0; 
-  // output range is the font size 
-  scale_font_size = d3.scale.log().domain([min_node_num,max_node_num]).range([max_fs,min_fs]).clamp('true');
   // define the scaling for the reduce font size factor 
   scale_reduce_font_size_factor = d3.scale.log().domain([min_node_num,max_node_num]).range([1,max_fs_zoom]).clamp('true');
   // define the scaling for the zoomability of the adjacency matrix
@@ -255,10 +257,6 @@ function initialize_clustergram(network_data){
 function set_visualization_size(){
   console.log('resizing')
 
-  // define offsets for permanent row and col margins 
-  row_offset = 280;
-  col_offset = 50;
-
   // // define margins for genes and resources labels
   // genes_label_margin = 50;
   // resources_label_margin = 50;
@@ -280,21 +278,15 @@ function set_visualization_size(){
   triangle_space = 30;
   col_label_width = label_scale(col_max_char) + triangle_space ;
 
-  // define offset for svg
-  // add x and y offsets and x spillover offset 
-  spillover_x_offset = label_scale(col_max_char)* 0.8 ;
-  svg_x_offset = 50 + spillover_x_offset; //  190;
-  svg_y_offset = 50;
-
   // distance between labels and clustergram
   // label_margin = 2*border_width;
   label_margin = 5;
+
 
   // Margins 
   col_margin = { top:col_label_width - label_margin, right:0, bottom:0, left:row_label_width              };//!!
   row_margin = { top:col_label_width,                right:0, bottom:0, left:row_label_width-label_margin };//!!
   margin     = { top:col_label_width,                right:0, bottom:0, left:row_label_width              };
-  offset     = { top:col_offset,     right:0, bottom:0, left:row_offset };
 
   // from http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
   x_window = window.innerWidth ;
@@ -311,37 +303,53 @@ function set_visualization_size(){
   // get screen height
   screen_height = Number(d3.select('#wrapper').style('height').replace('px',''));
 
+  // define offsets for permanent row and col margins 
+  // takes into consideration sidebar
+  container_row_offset = 280;
+  // takes into consideration footer and header margin
+  container_col_offset = 50;
+
   // adjust container with border
   // define width and height of clustergram container 
-  width_clust_container  = screen_width - offset.left;
-  height_clust_container = screen_height - offset.top;
+  width_clust_container  = screen_width - container_row_offset;
+  height_clust_container = screen_height - container_col_offset;
 
-  // adjust the width of the main container
-  d3.select('#main_container').style('width', width_clust_container+'px')
+
+  // Clustergram Container 
+  ///////////////////////////////
+
+  // set clustergram_container and clust_and_row_container dimensions 
+  // clustergram_container
+  d3.select('#clustergram_container').style('width', width_clust_container+'px')
+  d3.select('#clustergram_container').style('height', height_clust_container+'px')
+  // clust_and_row_container
+  d3.select('#clust_and_row_container').style('width',width_clust_container+'px')
+  d3.select('#clust_and_row_container').style('height',height_clust_container+'px')
+
+  // SVG 
+  ////////////////
+
+  // define offset for svg
+  // compenstates for permanent row and column labels as well
+  // as x spillover 
+  spillover_x_offset = label_scale(col_max_char)* 0.8 ;
+  svg_x_offset = 50 + spillover_x_offset;
+  svg_y_offset = 50;
+
+  // svg size: less than container size 
+  // subtract fixed length for permanent col and row labels and variable length for specific col and row labels 
+  svg_width  = width_clust_container  - svg_x_offset - row_label_width ;
+  svg_height = height_clust_container - svg_y_offset - col_label_width ;
 
   // set zoom factor 
-  zoom_factor = (width_clust_container/col_nodes.length)/(height_clust_container/row_nodes.length)
+  zoom_factor = (svg_width/col_nodes.length)/(svg_height/row_nodes.length)
 
   // ensure that width of rects is not less than height 
   // !! needs to be fixed, need more symmetry in the panning/zoom rules 
   if (zoom_factor < 1){
     // scale the height 
-    height_clust_container = width_clust_container*(row_nodes.length/col_nodes.length);
+    svg_height = svg_width*(row_nodes.length/col_nodes.length);
   };
-
-
-  // set clustergram_container
-  d3.select('#clustergram_container').style('width', width_clust_container+'px')
-  d3.select('#clustergram_container').style('height', height_clust_container+'px')
-
-  // set height of clust_and_row_container
-  d3.select('#clust_and_row_container').style('width',width_clust_container+'px')
-  d3.select('#clust_and_row_container').style('height',height_clust_container+'px')
-
-  // clustergram size 
-  // subtract fixed length for permanent col and row labels and variable length for specific col and row labels 
-  svg_width  = width_clust_container  - svg_x_offset - row_label_width ;
-  svg_height = height_clust_container - svg_y_offset - col_label_width ;
 
   // scaling functions 
   // scale used to size rects 
