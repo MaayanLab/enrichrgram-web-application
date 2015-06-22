@@ -179,7 +179,7 @@ function initialize_clustergram(network_data){
   // and zooming is required 
   // 1: do not increase font size while zooming
   // 0: increase font size while zooming
-  max_fs_zoom = 0.20; 
+  max_fs_zoom = 0.0; 
   // output range is the font size 
   scale_font_size = d3.scale.log().domain([min_node_num,max_node_num]).range([max_fs,min_fs]).clamp('true');
   // define the scaling for the reduce font size factor 
@@ -274,7 +274,7 @@ function set_visualization_size(){
   // define label scale parameters: the more characters in the longest name, the larger the margin 
   min_num_char = 5;
   max_num_char = 40;
-  min_label_width = 60;
+  min_label_width = 90;
   max_label_width = 250;
   label_scale = d3.scale.linear().domain([min_num_char,max_num_char]).range([min_label_width,max_label_width]).clamp('true');
 
