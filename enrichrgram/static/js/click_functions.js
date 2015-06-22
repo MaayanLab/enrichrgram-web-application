@@ -221,6 +221,7 @@ function add_double_click() {
       // reset row label zoom 
       d3.select('#row_labels')
         .attr("transform", "translate(" + row_margin.left + "," + row_margin.top + ")");
+        
       // use Qiaonan method to reset zoom 
       zoom.scale(1).translate([margin.left, margin.top]);
 
@@ -241,160 +242,103 @@ function add_double_click() {
 // define zoomed function 
 function zoomed() {
 
-  // transfer to x and y translate
+  // gather transformation components 
+  /////////////////////////////////////
+  // gather zoom components 
+  zoom_x = d3.event.scale;
+  zoom_y = d3.event.scale;
+
+  // gather translate vector components 
   trans_x = d3.event.translate[0] - margin.left;
   trans_y = d3.event.translate[1] - margin.top;
 
-  // reset column labels 
-  ///////////////////////////
-  // reset column label zoom 
-  d3.select('#col_labels')
-    .attr("transform", "translate(" + col_margin.left + "," + col_margin.top + ")");
-  // reset font size 
-  d3.selectAll('.col_label_text').select('text').style('font-size', default_fs_col+'px');
 
-  // reset bar heights 
-  ////////////////
-  // reduce the height of the enrichment bars based on the zoom applied 
-  // recalculate the height and divide by the zooming scale 
-  col_label_obj.select('rect')
-    // column is rotated - effectively width and height are switched
-    .attr('width', function(d,i) { return bar_scale_col( d.nl_pval )  ; });
+  // y - rules 
+  ///////////////////////////////////////////////////
 
-  // zoom into clustergram 
-  //////////////////////////////
-  // if height is less than width, zoom vertically only 
-  // zoom vertically
+  // available panning room in the y direction 
+  // multiple extra room (zoom - 1) by the width
+  // always defined in the same way 
+  pan_room_y = (d3.event.scale - 1) * svg_height ;
+
+  // do not translate if translate in y direction is positive 
+  if (trans_y >= 0 ) {
+    // restrict transformation parameters 
+    // no panning in either direction 
+    trans_y = 0; 
+  }
+  // restrict y pan to pan_room_y if necessary 
+  else if (trans_y <= -pan_room_y) {
+    // restrict transformation parameters 
+    // no panning in x direction 
+    trans_y = -pan_room_y; 
+  };
+
+  // x - rules 
+  ///////////////////////////////////////////////////
+  // zoom in y direction only - translate in y only
   if (d3.event.scale < zoom_switch) {
+    // no x translate or zoom 
+    trans_x = 0;
+    zoom_x = 1;
 
-    // reset x translate: margins have to be added always
-    zoom.translate([margin.left, margin.top+trans_y]);
-
-    // zoom in y direction only - translate in y only
-    ///////////////////////////////////////////////////
-    if (d3.event.translate[1] - margin.top <= 0){
-      // allow panning in the negative direction
-      svg_obj.attr('transform','translate(' + [ margin.left, margin.top + trans_y ] + ') scale(1,' + d3.event.scale + ')');
-
-      // row labels - only translate in one dimension, also zoom 
-      d3.select('#row_labels')
-        .attr('transform','translate(' + [row_margin.left, trans_y + margin.top] + ') scale(' + d3.event.scale + ')');
-
-    }
-    else{
-
-
-      // do not translate 
-      // reset translate vector 
-      zoom.translate([margin.left, margin.top]);
-      // apply transform
-      svg_obj.attr('transform','translate(' + [ margin.left, margin.top ] + ') scale(1,' + d3.event.scale + ')');
-    }
   }
   // zoom in both directions 
+  // scale is greater than zoom_switch 
   else{
-    console.log('2d zooming')
 
-    // available panning room
+    // available panning room in the x direction 
     // multiple extra room (zoom - 1) by the width
-    pan_room = (d3.event.scale/zoom_switch - 1) * svg_width ;
+    pan_room_x = (d3.event.scale/zoom_switch - 1) * svg_width ;
 
-    // row labels - only translate in one dimension, also zoom
-    d3.select('#row_labels')
-      .attr('transform', 'translate(' + [row_margin.left, trans_y + margin.top] + ') scale(' + d3.event.scale + ')');
-
-    // pan rules 
-    ///////////////////////
     // no panning in the positive direction 
-    if (d3.event.translate[0] - margin.left > 0){
+    if (trans_x > 0){
 
-      // reset the translate vector - keeping the old y_trans
-      zoom.translate([margin.left, margin.top + trans_y]);
-
-      // only translate in the y direction, zoom in both directions
-      svg_obj.attr('transform','translate(' + [ margin.left, margin.top + trans_y ] + ') scale('+d3.event.scale/zoom_switch+',' + d3.event.scale + ')');
-
-      // column labels - only translate in one dimension, also zoom 
-      d3.select('#col_labels')
-        .attr('transform','translate(' + [col_margin.left, col_margin.top] + ') scale(' + d3.event.scale/zoom_switch + ')');
-
-      // reduce font-size to compensate for zoom 
-      // calculate the recuction of the font size 
-      reduce_font_size = d3.scale.linear().domain([0,1]).range([1,d3.event.scale/zoom_switch]).clamp('true');
-      // scale down the font to compensate for zooming 
-      fin_font = default_fs_col/(reduce_font_size(reduce_font_size_factor_col)); 
-      // add back the 'px' to the font size 
-      fin_font = fin_font + 'px';
-      // change the font size of the labels 
-      d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
-
-      // reduce the height of the enrichment bars based on the zoom applied 
-      // recalculate the height and divide by the zooming scale 
-      col_label_obj.select('rect')
-        // column is rotated - effectively width and height are switched
-        .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / (d3.event.scale/zoom_switch) ; });
+      // restrict transformation parameters 
+      // no panning in the x direction 
+      trans_x = 0; 
+      // set zoom_x
+      zoom_x = d3.event.scale/zoom_switch;
 
     }
-    // allow panning in the negative direction 
-    else if (d3.event.translate[0] - margin.left <= -pan_room){
+    // restrict panning to pan_room_x 
+    else if (trans_x <= -pan_room_x){
 
-      // reset the translate vector 
-      zoom.translate([margin.left - pan_room, margin.top + trans_y]);
-
-      // translate canvas
-      svg_obj.attr('transform','translate(' + [ margin.left - pan_room, margin.top + trans_y ] + ') scale('+d3.event.scale/zoom_switch+',' + d3.event.scale + ')');
-
-      // column labels - only translate in one dimension, also zoom 
-      d3.select('#col_labels')
-        .attr('transform','translate(' + [col_margin.left - pan_room, col_margin.top] + ') scale(' + d3.event.scale/zoom_switch + ')');
-
-      // reduce font-size to compensate for zoom 
-      // calculate the recuction of the font size 
-      reduce_font_size = d3.scale.linear().domain([0,1]).range([1,d3.event.scale/zoom_switch]).clamp('true');
-      // scale down the font to compensate for zooming 
-      fin_font = default_fs_col/(reduce_font_size(reduce_font_size_factor_col)); 
-      // add back the 'px' to the font size 
-      fin_font = fin_font + 'px';
-      // change the font size of the labels 
-      d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
-
-      // reduce the height of the enrichment bars based on the zoom applied 
-      // recalculate the height and divide by the zooming scale 
-      col_label_obj.select('rect')
-        // column is rotated - effectively width and height are switched
-        .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / (d3.event.scale/zoom_switch) ; });
+      // restrict transformation parameters 
+      // no panning in the x direction 
+      trans_x = -pan_room_x; 
+      // set zoom_x 
+      zoom_x = d3.event.scale/zoom_switch;
 
     }
     // allow two dimensional panning 
     else{
-      // unrestricted
-      svg_obj.attr('transform','translate(' + [ margin.left + trans_x, margin.top + trans_y ] + ') scale('+d3.event.scale/zoom_switch+',' + d3.event.scale + ')');
 
-      // column labels - only translate in one dimension, also zoom 
-      d3.select('#col_labels')
-        // !! not sure why I don't need to use margin.left here like I did with rows, but it works, I might have taken
-        // this margin into consideration already in the col labels. Or maybe because I never reset. 
-        .attr('transform','translate(' + [col_margin.left + trans_x , col_margin.top] + ') scale(' + d3.event.scale/zoom_switch + ')');
+      // restrict transformation parameters 
+      // set zoom_x 
+      zoom_x = d3.event.scale/zoom_switch;
 
-      // reduce font-size to compensate for zoom 
-      // calculate the recuction of the font size 
-      reduce_font_size = d3.scale.linear().domain([0,1]).range([1,d3.event.scale/zoom_switch]).clamp('true');
-      // scale down the font to compensate for zooming 
-      fin_font = default_fs_col/(reduce_font_size(reduce_font_size_factor_col)); 
-      // add back the 'px' to the font size 
-      fin_font = fin_font + 'px';
-      // change the font size of the labels 
-      d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
+    };
 
-      // reduce the height of the enrichment bars based on the zoom applied 
-      // recalculate the height and divide by the zooming scale 
-      col_label_obj.select('rect')
-        // column is rotated - effectively width and height are switched
-        .attr('width', function(d,i) { return bar_scale_col( d.nl_pval ) / (d3.event.scale/zoom_switch) ; });
+  };
 
-    }
+  // apply transformation and reset translate vector 
+  // the zoom vector (zoom.scale) never gets reset 
+  ///////////////////////////////////////////////////
+  // translate clustergram 
+  svg_obj.attr('transform','translate(' + [ margin.left + trans_x, margin.top + trans_y ] + ') scale('+ zoom_x +',' + zoom_y + ')');
 
-  }
+  // transform row labels 
+  d3.select('#row_labels')
+    .attr('transform','translate(' + [row_margin.left , margin.top + trans_y] + ') scale(' + zoom_y + ')');
+
+  // transform col labels
+  // move down col labels as zooming occurs, subtract trans_x - 20 almost works 
+  d3.select('#col_labels')
+    .attr('transform','translate(' + [col_margin.left + trans_x , col_margin.top] + ') scale(' + zoom_x + ')');
+
+  // reset translate vector - add back margins to trans_x and trans_y  
+  zoom.translate([ trans_x +  margin.left, trans_y + margin.top]);
 
 
   // reduce font-size to compensate for zoom 
@@ -408,6 +352,15 @@ function zoomed() {
   d3.selectAll('.row_label_text').select('text').style('font-size', fin_font);
 
 
+  // reduce font-size to compensate for zoom 
+  // calculate the recuction of the font size 
+  reduce_font_size = d3.scale.linear().domain([0,1]).range([1,zoom_x]).clamp('true');
+  // scale down the font to compensate for zooming 
+  fin_font = default_fs_col/(reduce_font_size(reduce_font_size_factor_col)); 
+  // add back the 'px' to the font size 
+  fin_font = fin_font + 'px';
+  // change the font size of the labels 
+  d3.selectAll('.col_label_text').select('text').style('font-size', fin_font);
 
 
 };
