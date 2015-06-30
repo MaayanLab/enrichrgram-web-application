@@ -52,9 +52,6 @@ $( "#searchForm" ).submit( function( event ) {
     // generate the d3 visualization 
     posting.done( function( network_data ) { 
 
-      // wait message 
-      d3.select('.blockMsg').select('h1').text('Waiting for matrix to load...');
-
       // define global variable network_data
       global_network_data = network_data;
 
@@ -67,9 +64,6 @@ $( "#searchForm" ).submit( function( event ) {
 
       // turn off the wait sign 
       $.unblockUI();
-
-      // // toggle close the sidebar
-      // d3.select('#wrapper').attr('class','toggled')
 
     });
 
